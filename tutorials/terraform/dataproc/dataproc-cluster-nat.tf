@@ -88,15 +88,15 @@ resource "yandex_vpc_default_security_group" "dataproc-security-group" {
 
 # Subnet for Data Proc clusters
 resource "yandex_vpc_subnet" "dataproc-subnet" {
-  name           = "dataproc-net"
+  name           = "dataproc-subnet"
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.dataproc-net.id
   v4_cidr_blocks = ["192.168.1.0/24"]
 }
 
 # Subnet for NAT instance VM
-resource "yandex_vpc_subnet" "dataproc-nat-net" {
-  name           = "dataproc-nat-net"
+resource "yandex_vpc_subnet" "dataproc-subnet-nat" {
+  name           = "dataproc-subnet-nat"
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.dataproc-net.id
   v4_cidr_blocks = ["192.168.100.0/24"]
@@ -120,7 +120,7 @@ resource "yandex_compute_instance" "nat-instance-vm" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.dataproc-nat-net.id
+    subnet_id = yandex_vpc_subnet.dataproc-subnet-nat.id
     nat       = true # Required for connection from the Internet
   }
 
