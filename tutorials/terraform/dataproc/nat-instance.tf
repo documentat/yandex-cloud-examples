@@ -51,25 +51,25 @@ resource "yandex_vpc_default_security_group" "dataproc-security-group" {
 }
 
 # Subnet for Data Proc clusters
-resource "yandex_vpc_subnet" "dataproc-subnet-vb" {
-  name           = "dataproc-net-vb"
+resource "yandex_vpc_subnet" "dataproc-subnet" {
+  name           = "dataproc-net"
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.dataproc-net.id
   v4_cidr_blocks = ["192.168.1.0/24"]
 }
 
 # Subnet for NAT instance VM
-resource "yandex_vpc_subnet" "dataproc-nat-net-vb" {
-  name           = "dataproc-nat-net-vb"
+resource "yandex_vpc_subnet" "dataproc-nat-net" {
+  name           = "dataproc-nat-net"
   zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.dataproc-net.id
   v4_cidr_blocks = ["192.168.100.0/24"]
 }
 
 # NAT instance Virtual Machine
-resource "yandex_compute_instance" "intermediate-vm-vb" {
+resource "yandex_compute_instance" "nat-instance-vm" {
 
-  name        = "nat-instance-vb-vm"
+  name        = "nat-instance-vm"
   platform_id = "standard-v3" # Intel Ice Lake
 
   resources {
@@ -84,7 +84,7 @@ resource "yandex_compute_instance" "intermediate-vm-vb" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.dataproc-nat-net-vb.id
+    subnet_id = yandex_vpc_subnet.dataproc-nat-net.id
     nat       = true # Required for connection from the Internet
   }
 
@@ -95,10 +95,10 @@ resource "yandex_compute_instance" "intermediate-vm-vb" {
 
 # Managed Service for Data Proc cluster
 
-resource "yandex_dataproc_cluster" "dataproc-cluster-vb" {
-  bucket             = "bucket-dataproc-vb"
-  name               = "dataproc-cluster-vb"
-  service_account_id = "dataproc-sa-vb.id"
+resource "yandex_dataproc_cluster" "dataproc-cluster" {
+  bucket             = "bucket-dataproc"
+  name               = "dataproc-cluster"
+  service_account_id = "dataproc-sa.id"
   zone_id            = "ru-central1-a"
   security_group_ids = ["yandex_vpc_default_security_group.dataproc-security-group.id"]
 
@@ -113,26 +113,26 @@ resource "yandex_dataproc_cluster" "dataproc-cluster-vb" {
     }
 
     subcluster_spec {
-      name = "dataproc-cluster-vb-sub1"
+      name = "dataproc-cluster-sub1"
       role = "MASTERNODE"
       resources {
         resource_preset_id = "s2.micro"
         disk_type_id       = "network-ssd"
         disk_size          = 128
       }
-      subnet_id   = "dataproc-subnet-vb.id"
+      subnet_id   = "dataproc-subnet.id"
       hosts_count = 1
     }
 
     subcluster_spec {
-      name = "dataproc-cluster-vb-sub2"
+      name = "dataproc-cluster-sub2"
       role = "DATANODE"
       resources {
         resource_preset_id = "s2.small"
         disk_type_id       = "network-hdd"
         disk_size          = 128
       }
-      subnet_id   = "dataproc-subnet-vb.id"
+      subnet_id   = "dataproc-subnet.id"
       hosts_count = 1
     }
   }
