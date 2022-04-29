@@ -5,6 +5,42 @@
 #
 # Set the Set the configuration of Managed Service for Data Proc cluster and NAT instance Virtual Machine
 
+# Service account for Data Proc cluster
+resource "yandex_iam_service_account" "dataproc-sa" {
+  name        = "dataproc-sa"
+  description = "Service account for Data Proc cluster"
+}
+
+resource "yandex_resourcemanager_folder_iam_binding" "dataproc" {
+  folder_id = "b1gltoh4137qh60ho4iv"
+  role    = "mdb.dataproc.agent"
+  members = [
+    "serviceAccount:${yandex_iam_service_account.dataproc-sa.id}"
+  ]
+}
+
+resource "yandex_resourcemanager_folder_iam_binding" "bucket-creator" {
+  folder_id = "b1gltoh4137qh60ho4iv"
+  role    = "editor"
+  members = [
+    "serviceAccount:${yandex_iam_service_account.dataproc-sa.id}"
+  ]
+}
+
+resource "yandex_iam_service_account_static_access_key" "s-key-dataproc" {
+  service_account_id = yandex_iam_service_account.dataproc-sa.id
+}
+
+resource "yandex_storage_bucket" "bucket-dataproc" {
+  depends_on = [
+    yandex_resourcemanager_folder_iam_binding.bucket-creator
+  ]
+
+  bucket     = "bucket-dataproc"
+  access_key = yandex_iam_service_account_static_access_key.s-key-dataproc.access_key
+  secret_key = yandex_iam_service_account_static_access_key.s-key-dataproc.secret_key
+}
+
 # Network
 resource "yandex_vpc_network" "dataproc-net" {
   name        = "dataproc-net"
@@ -18,28 +54,28 @@ resource "yandex_vpc_default_security_group" "dataproc-security-group" {
 
   # Allow service traffic
   ingress {
-    protocol          = "TCP"
-    description       = "Allow service traffic"
-    from_port         = 0
-    to_port           = 65535
-    predefined_target = "self_security_group"
-  }
-
-  # Allow service traffic
-  egress {
-    protocol          = "TCP"
-    description       = "Allow service traffic"
-    from_port         = 0
-    to_port           = 65535
-    predefined_target = "self_security_group"
-  }
-
-  # Allow HTTPS traffic
-  ingress {
     protocol       = "TCP"
-    description    = "Allow HTTPS connections"
-    port           = 443
-    v4_cidr_blocks = ["0.0.0.0/0"]
+    description    = "Allow service traffic"
+    from_port           = 0
+    to_port       = 65535
+    predefined_target = "self_security_group"
+  }
+
+    # Allow service traffic
+  egress {
+    protocol       = "TCP"
+    description    = "Allow service traffic"
+    from_port           = 0
+    to_port       = 65535
+    predefined_target = "self_security_group"
+  }
+
+    # Allow HTTPS traffic
+  ingress {
+  protocol       = "TCP"
+  description    = "Allow HTTPS connections"
+  port           = 443
+  v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -79,7 +115,7 @@ resource "yandex_compute_instance" "nat-instance-vm" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd85vbr6kin3r8ro2e95"
+      image_id = "fd85vbr6kin3r8ro2e95" # Set ID for the "NAT instance" image
     }
   }
 
@@ -89,26 +125,26 @@ resource "yandex_compute_instance" "nat-instance-vm" {
   }
 
   metadata = {
-    ssh-keys = "<username>:${file("path for SSH public key")}" # Set username and path for SSH public key
+    ssh-keys = "dataproc:${file("~/.ssh/yandex-bb.pub")}" # Set username and path for SSH public key
   }
 }
 
 # Managed Service for Data Proc cluster
 
 resource "yandex_dataproc_cluster" "dataproc-cluster" {
-  bucket             = "bucket-dataproc"
-  name               = "dataproc-cluster"
-  service_account_id = "dataproc-sa.id"
-  zone_id            = "ru-central1-a"
-  security_group_ids = ["yandex_vpc_default_security_group.dataproc-security-group.id"]
+  bucket              = "bucket-dataproc"
+  name                = "dataproc-cluster"
+  service_account_id  = "dataproc-sa.id"
+  zone_id             = "ru-central1-a"
+  security_group_ids  = ["yandex_vpc_default_security_group.dataproc-security-group.id"]
 
   cluster_config {
     version_id = "2.0"
 
     hadoop {
-      services = ["MAPREDUCE", "SPARK", "YARN", "HDFS", "TEZ"]
+      services   = ["MAPREDUCE", "SPARK", "YARN", "HDFS", "TEZ"]
       ssh_public_keys = [
-        file("path for SSH public key") # Set the path for SSH public key
+        file("~/.ssh/yandex-bb.pub")
       ]
     }
 
