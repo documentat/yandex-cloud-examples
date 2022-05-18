@@ -113,7 +113,7 @@ resource "yandex_mdb_kafka_cluster" "kafka_cluster" {
   }
 
   user {
-    name     = "tutorial-user"
+    name     = "user"
     password = "" # Set password
     permission {
       topic_name = "messages"
