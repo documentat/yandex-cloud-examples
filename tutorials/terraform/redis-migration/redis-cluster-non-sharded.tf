@@ -32,13 +32,6 @@ resource "yandex_vpc_default_security_group" "redis-and-vm-security-group" {
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
-  egress {
-    protocol       = "TCP"
-    description    = "Allow HTTP connections"
-    port           = 80
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
   ingress {
     protocol       = "TCP"
     description    = "Allow HTTPS connections"
@@ -46,21 +39,7 @@ resource "yandex_vpc_default_security_group" "redis-and-vm-security-group" {
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
-  egress {
-    protocol       = "TCP"
-    description    = "Allow HTTPS connections"
-    port           = 443
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
   ingress {
-    protocol       = "TCP"
-    description    = "Allow direct connections to cluster"
-    port           = 6379
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
     protocol       = "TCP"
     description    = "Allow direct connections to cluster"
     port           = 6379
@@ -121,7 +100,7 @@ resource "yandex_compute_instance" "intermediate-vm" {
 
   boot_disk {
     initialize_params {
-      image_id = "" # Set image ID
+      image_id = "" # Set public image ID from https://cloud.yandex.com/en/docs/compute/operations/images-with-pre-installed-software/get-list
     }
   }
 
@@ -131,6 +110,6 @@ resource "yandex_compute_instance" "intermediate-vm" {
   }
 
   metadata = {
-    ssh-keys = "<username>:${file("path for SSH public key")}" # Set username and path for SSH public key
+    ssh-keys = "<username>:${file("path for SSH public key")}" # Set username and path for SSH public key. If an Ubuntu image is used, the username will be "ubuntu".
   }
 }
