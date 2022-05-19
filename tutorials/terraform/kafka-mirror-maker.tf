@@ -5,7 +5,6 @@
 #
 # Set the configuration:
 # * Managed Service for Apache Kafka cluster:
-#      * admin account name
 #      * admin account password
 # * Virtual Machine:
 #      * Image ID
@@ -81,8 +80,8 @@ resource "yandex_mdb_kafka_cluster" "kafka-cluster" {
   }
 
   user {
-    name     = "" # Set admin username for Kafka cluster
-    password = "" # Set admin password for Kafka cluster
+    name     = "admin-cloud" # Admin username for Kafka cluster
+    password = ""            # Set admin password for Kafka cluster
     permission {
       topic_name = "*"
       role       = "ACCESS_ROLE_ADMIN"
@@ -103,7 +102,7 @@ resource "yandex_compute_instance" "vm-mirror-maker" {
 
   boot_disk {
     initialize_params {
-      image_id = "" # Set image ID
+      image_id = "" # Set public image ID from https://cloud.yandex.com/en/docs/compute/operations/images-with-pre-installed-software/get-list
     }
   }
 
@@ -113,6 +112,6 @@ resource "yandex_compute_instance" "vm-mirror-maker" {
   }
 
   metadata = {
-    ssh-keys = "<username>:${file("path for SSH public key")}" # Set username and path for SSH public key
+    ssh-keys = "<username>:${file("path for SSH public key")}" # Set username and path for SSH public key. If an Ubuntu image is used, the username will be "ubuntu".
   }
 }
