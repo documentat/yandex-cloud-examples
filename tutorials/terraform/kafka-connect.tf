@@ -47,7 +47,7 @@ resource "yandex_compute_instance" "vm-ubuntu-20-04" {
   network_interface {
     subnet_id          = yandex_vpc_subnet.subnet-a.id
     nat                = true
-    security_group_ids = [yandex_vpc_default_security_group.kafka_security_group.id]
+    security_group_ids = [yandex_vpc_default_security_group.kafka-connect-security-group.id]
   }
 
   metadata = {
@@ -58,7 +58,7 @@ resource "yandex_compute_instance" "vm-ubuntu-20-04" {
 }
 
 # Security group for Managed Service for Apache Kafka® cluster
-resource "yandex_vpc_default_security_group" "kafka_security_group" {
+resource "yandex_vpc_default_security_group" "kafka-connect-security-group" {
   network_id = yandex_vpc_network.kafka-connect-network.id
 
   ingress {
@@ -96,7 +96,7 @@ resource "yandex_mdb_kafka_cluster" "kafka-connect-cluster" {
   environment        = "PRODUCTION"
   name               = "kafka-connect-cluster"
   network_id         = yandex_vpc_network.kafka-connect-network.id
-  security_group_ids = [yandex_vpc_default_security_group.kafka_security_group.id]
+  security_group_ids = [yandex_vpc_default_security_group.kafka-connect-security-group.id]
 
   config {
     assign_public_ip = true
