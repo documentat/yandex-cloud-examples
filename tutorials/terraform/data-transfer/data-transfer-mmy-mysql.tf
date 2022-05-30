@@ -1,56 +1,59 @@
+# Set source and target cluster settings
 locals {
-  folder_id      = "" # Set your cloud folder ID
+  # Source cluster settings
   mdb-cluster-id = "" # Set the Managed Service for MySQL cluster ID
-  user-source    = "" # Set the source username 
-  user-target    = "" # Set the target username
-  db-source      = "" # Set the source database name
-  db-target      = "" # Set the target database name
-  pwd-source     = "" # Set the source password
-  pwd-target     = "" # Set the target password
-  host-target    = "" # Set the target master host IP address or FQDN
-  port-target    = "" # Set the target port number that Data Transfer will use for connections
+  source-user    = "" # Set the source cluster username 
+  source-db      = "" # Set the source cluster database name
+  source-pwd     = "" # Set the source cluster password
+  # Target cluster settings
+  target-user = ""   # Set the target cluster username
+  target-db   = ""   # Set the target cluster database name
+  target-pwd  = ""   # Set the target cluster password
+  target-host = ""   # Set the target cluster master host IP address or FQDN
+  target-port = 3306 # Set the target cluster port number that Data Transfer will use for connections
 }
 
 resource "yandex_datatransfer_endpoint" "managed-mysql-source" {
-  name = "managed-mysql-source"
+  description = "Source endpoint for Managed Service for MySQL cluster"
+  name        = "managed-mysql-source"
   settings {
     mysql_source {
       connection {
         mdb_cluster_id = local.mdb-cluster-id
       }
-      database = local.db-source
-      user     = local.user-source
+      database = local.source-db
+      user     = local.source-user
       password {
-        raw = local.pwd-source
+        raw = local.source-pwd
       }
     }
   }
 }
 
 resource "yandex_datatransfer_endpoint" "mysql-target" {
-  folder_id = local.folder_id
-  name      = "mysql-target"
+  description = "Target endpoint for MySQL cluster"
+  name        = "mysql-target"
   settings {
     mysql_target {
       connection {
         on_premise {
-          hosts = [local.host-target]
-          port  = local.port-target
+          hosts = [local.target-host]
+          port  = local.target-port
         }
       }
-      database = local.db-target
-      user     = local.user-target
+      database = local.target-db
+      user     = local.target-user
       password {
-        raw = local.pwd-target
+        raw = local.target-pwd
       }
     }
   }
 }
 
 resource "yandex_datatransfer_transfer" "mysql-transfer" {
-  folder_id = local.folder_id
-  name      = "mysql"
-  source_id = yandex_datatransfer_endpoint.managed-mysql-source.id
-  target_id = yandex_datatransfer_endpoint.mysql-target.id
-  type      = "SNAPSHOT_AND_INCREMENT"
+  description = "Transfer from Managed for MySQL cluster to MySQL cluster"
+  name        = "transfer-from-managed-mysql-to-onpremise-mysql"
+  source_id   = yandex_datatransfer_endpoint.managed-mysql-source.id
+  target_id   = yandex_datatransfer_endpoint.mysql-target.id
+  type        = "SNAPSHOT_AND_INCREMENT" # Copy all data from the source cluster and start replication
 }
