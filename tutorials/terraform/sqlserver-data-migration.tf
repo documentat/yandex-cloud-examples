@@ -10,7 +10,7 @@ locals {
   username           = "" # Set a user name.
   password           = "" # Set a user password.
 }
-# Add users who are in the source database and use **SQL Server Authentication**, with the same names and passwords. Look line 82.
+# For Migration using Logical import add users who are in the source database and use **SQL Server Authentication**, with the same names and passwords. Look line 82.
 
 resource "yandex_vpc_network" "network" {
   description = "Network for the Managed Service for SQL Server cluster."
@@ -79,7 +79,7 @@ resource "yandex_mdb_sqlserver_cluster" "sqlserver-cluster" {
     }
   }
 
-  # Uncomment, multiply this block and аdd users who are in the source database and use **SQL Server Authentication**, with the same names and passwords.
+  # For Migration using Logical import uncomment, multiply this block and аdd users who are in the source database and use **SQL Server Authentication**, with the same names and passwords.
   #  user {
   #    name     = 
   #    password = 
