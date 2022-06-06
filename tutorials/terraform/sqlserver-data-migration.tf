@@ -10,7 +10,7 @@ locals {
   username           = "" # Set a user name.
   password           = "" # Set a user password.
 }
-# For Migration using Logical import add users who are in the source database and use **SQL Server Authentication**, with the same names and passwords. Look line 82.
+# For Migration using Logical import add users who are in the source database and use SQL Server Authentication, with the same names and passwords. Look line 74.
 
 resource "yandex_vpc_network" "network" {
   description = "Network for the Managed Service for SQL Server cluster."
@@ -33,14 +33,6 @@ resource "yandex_vpc_security_group" "security-group" {
     description    = "Allow connections to SQL Server from the Internet."
     protocol       = "TCP"
     port           = 1433
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    description    = "Allow outgoing connections to any required resource."
-    protocol       = "ANY"
-    from_port      = 0
-    to_port        = 65535
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 }
