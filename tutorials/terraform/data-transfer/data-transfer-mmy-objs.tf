@@ -19,7 +19,7 @@ locals {
   target_endpoint_id = "" # Set the target endpoint id.
 
   # Transfer settings:
-  transfer_enable = 0 # Set to 1 to enable transfer.
+  transfer_enable = 0 # Value '0' disables creating transfer before the source endpoint is created by hands. After that, set to 1 to enable transfer.
 }
 
 resource "yandex_vpc_network" "network" {
