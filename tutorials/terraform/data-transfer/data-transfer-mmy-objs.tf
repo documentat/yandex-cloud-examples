@@ -16,10 +16,15 @@ locals {
 
   # Target bucket settings:
   bucket_name        = "" # Set an Object Storage bucket name. It must be unique throughout Object Storage.
+
+  # Specify these settings ONLY AFTER the cluster and bucket are created. Then run "terraform apply" command again.
+  # You should set up the target endpoint using the GUI to obtain its ID.
+
+  # Target endpoint settings:
   target_endpoint_id = "" # Set the target endpoint id.
 
   # Transfer settings:
-  transfer_enable = 0 # Value '0' disables creating transfer before the source endpoint is created by hands. After that, set to 1 to enable transfer.
+  transfer_enabled = 0 # Value '0' disables creating of transfer before the target endpoint is created manually. After that, set to '1' to enable transfer.
 }
 
 resource "yandex_vpc_network" "network" {
@@ -161,7 +166,7 @@ resource "yandex_datatransfer_endpoint" "managed-mysql-source" {
 }
 
 resource "yandex_datatransfer_transfer" "mmy-objs-transfer" {
-  count       = local.transfer_enable
+  count       = local.transfer_enabled
   description = "Transfer from the Managed Service for MySQL to the Object Storage"
   name        = "transfer-from-mmy-to-objstorage"
   source_id   = yandex_datatransfer_endpoint.managed-mysql-source.id
