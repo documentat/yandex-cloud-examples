@@ -13,10 +13,13 @@ locals {
 
   # Target YDB settings:
   target_db_name     = "" # Set a YDB database name.
+
+  # Specify these settings ONLY AFTER the cluster and YDB database are created. Then run "terraform apply" command again.
+  # You should set up the target endpoint using the GUI to obtain its ID.
   target_endpoint_id = "" # Set the target endpoint id.
 
   # Transfer settings:
-  transfer_enable = 0 # Set to 1 to enable Transfer.
+  transfer_enabled = 0 # Value '0' disables creating of transfer before the target endpoint is created manually. After that, set to '1' to enable transfer.
 }
 
 resource "yandex_vpc_network" "network" {
@@ -99,7 +102,7 @@ resource "yandex_ydb_database_serverless" "ydb" {
 }
 
 resource "yandex_datatransfer_transfer" "mkf-ydb-transfer" {
-  count       = local.transfer_enable
+  count       = local.transfer_enabled
   description = "Transfer from the Managed Service for Apache Kafka to the YDB database"
   name        = "transfer-from-mkf-to-ydb"
   source_id   = local.source_endpoint_id
