@@ -9,14 +9,14 @@ locals {
   source_kf_version    = "" # Set Managed Service for Apache Kafka cluster version.
   source_user_name     = "" # Set a username in the Managed Service for Apache Kafka cluster.
   source_user_password = "" # Set a password for the user in the Managed Service for Apache Kafka cluster.
-  source_endpoint_id   = "" # Set the source endpoint id.
 
   # Target YDB settings:
   target_db_name     = "" # Set a YDB database name.
 
   # Specify these settings ONLY AFTER the cluster and YDB database are created. Then run "terraform apply" command again.
-  # You should set up the target endpoint using the GUI to obtain its ID.
-  target_endpoint_id = "" # Set the target endpoint id.
+  # You should set up the source and target endpoint using the GUI to obtain its ID.
+  source_endpoint_id   = "" # Set the source endpoint id.
+  target_endpoint_id   = "" # Set the target endpoint id.
 
   # Transfer settings:
   transfer_enabled = 0 # Value '0' disables creating of transfer before the target endpoint is created manually. After that, set to '1' to enable transfer.
